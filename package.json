@@ -1,0 +1,9 @@
+{
+  "name": "barbershop-demo",
+  "version": "1.0.0",
+  "description": "Premium Barbershop Booking Demo",
+  "main": "index.html",
+  "dependencies": {
+    "@vercel/kv": "^1.0.1"
+  }
+}
