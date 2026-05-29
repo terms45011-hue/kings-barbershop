@@ -66,11 +66,29 @@
     .mob-book-btn:hover{background:var(--gold);color:var(--bg)}
 
     /* ─── HERO ─── */
-    .hero{min-height:100vh;display:flex;align-items:center;position:relative;overflow:hidden}
-    .hero-bg-img{position:absolute;inset:0;background:url('images/hero.png') center/cover no-repeat;opacity:.35;filter:brightness(.5) contrast(1.1)}
-    .hero-bg-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,5,5,.6) 0%,rgba(5,5,5,.3) 40%,rgba(5,5,5,.8) 100%)}
-    .hero-noise{position:absolute;inset:0;opacity:.04;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")}
-    .hero .container{position:relative;z-index:2;text-align:center;padding-top:140px;padding-bottom:100px}
+    .hero{min-height:100vh;display:flex;align-items:center;position:relative;overflow:hidden;background:#030303}
+    /* Banksy animated background */
+    .hero-banksy-bg{position:absolute;inset:0;z-index:0}
+    #banksy-canvas{width:100%;height:100%;display:block;opacity:.9}
+    .hero-bg-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(3,3,3,.55) 0%,rgba(3,3,3,.15) 45%,rgba(3,3,3,.75) 100%);z-index:1}
+    /* grain texture */
+    .hero-noise{position:absolute;inset:0;z-index:2;opacity:.06;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");pointer-events:none}
+    /* spray-paint drips animated */
+    .hero-drips{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+    .drip{position:absolute;top:0;width:2px;background:linear-gradient(180deg,rgba(200,164,78,.7),rgba(200,164,78,0));border-radius:0 0 2px 2px;animation:dripFall linear infinite;transform-origin:top center}
+    @keyframes dripFall{0%{height:0;opacity:.8;top:0}60%{opacity:.9}100%{height:180px;opacity:0;top:30px}}
+    .hero .container{position:relative;z-index:3;text-align:center;padding-top:140px;padding-bottom:100px}
+
+    /* ─── BANKSY SECTION ─── */
+    .banksy-section{position:relative;overflow:hidden;background:#050505;padding:0}
+    .banksy-full{width:100%;min-height:70vh;display:flex;align-items:center;justify-content:center;position:relative}
+    #banksy-scene{width:100%;height:70vh;display:block}
+    .banksy-caption{position:absolute;bottom:3rem;left:50%;transform:translateX(-50%);text-align:center;z-index:10}
+    .banksy-caption-tag{font-size:.6rem;letter-spacing:.35em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:.5rem}
+    .banksy-caption-title{font-family:var(--font-h);font-size:clamp(1.5rem,3vw,2.5rem);color:var(--white);letter-spacing:.08em}
+    /* paint reveal border */
+    .banksy-section::before,.banksy-section::after{content:'';position:absolute;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--gold),transparent);z-index:5}
+    .banksy-section::before{top:0} .banksy-section::after{bottom:0}
     .hero-tag{display:inline-flex;align-items:center;gap:1rem;margin-bottom:2rem;opacity:0;animation:fadeUp .8s ease .3s forwards}
     .hero-tag-line{width:50px;height:1px;background:var(--gold)}
     .hero-tag-text{font-size:.65rem;font-weight:600;letter-spacing:.35em;text-transform:uppercase;color:var(--gold)}
@@ -306,8 +324,6 @@
       .about-img-wrap{max-width:500px;margin:0 auto}
       .contact-grid{grid-template-columns:1fr;gap:3rem}
       .exp-grid{grid-template-columns:1fr;gap:1.5rem}
-      .gallery-grid{grid-template-columns:repeat(2,1fr)}
-      .gallery-item.tall{grid-row:span 1}
     }
     @media(max-width:768px){
       section{padding:5rem 0}
@@ -321,6 +337,8 @@
       .steps-ind{padding:1rem 1.25rem}
       .about-stats{grid-template-columns:repeat(3,1fr)}
       .cursor,.cursor-dot{display:none}
+      #banksy-scene{height:50vh}
+      .banksy-full{min-height:50vh}
     }
     @media(max-width:480px){
       .container{padding:0 1.25rem}
@@ -328,7 +346,6 @@
       .btn-gold,.btn-outline{width:100%;justify-content:center}
       .footer-grid{grid-template-columns:1fr}
       .about-stats{grid-template-columns:repeat(3,1fr);gap:1rem}
-      .gallery-grid{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -377,9 +394,14 @@
 
 <!-- ═══════════════ HERO ═══════════════ -->
 <section class="hero" id="home">
-  <div class="hero-bg-img"></div>
+  <!-- Animated Banksy canvas background -->
+  <div class="hero-banksy-bg">
+    <canvas id="banksy-canvas"></canvas>
+  </div>
   <div class="hero-bg-overlay"></div>
   <div class="hero-noise"></div>
+  <!-- Gold drip accents -->
+  <div class="hero-drips" id="hero-drips"></div>
   <div class="container">
     <div class="hero-tag">
       <span class="hero-tag-line"></span>
@@ -392,7 +414,7 @@
     <p class="hero-subtitle">Premium cuts, sharp fades & meticulous grooming by Dublin's most skilled barbers. Walk in a gentleman, walk out a king.</p>
     <div class="hero-actions">
       <button class="btn-gold" id="btn-open-hero"><span>Book Your Chair</span></button>
-      <a href="#gallery" class="btn-outline">View Our Work →</a>
+      <a href="#about" class="btn-outline">Discover More →</a>
     </div>
   </div>
   <div class="hero-scroll">
@@ -455,39 +477,13 @@
   </div>
 </section>
 
-<!-- ═══════════════ GALLERY ═══════════════ -->
-<section class="gallery" id="gallery">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="section-tag">Portfolio</span>
-      <h2 class="section-title">Our Work Speaks</h2>
-      <p class="section-sub">Every cut tells a story. Browse our latest work and see the Kings Barber Co difference.</p>
-    </div>
-  </div>
-  <div class="gallery-grid stagger" style="max-width:1200px;margin:0 auto;padding:0 2rem">
-    <div class="gallery-item tall">
-      <img src="images/barber-action.png" alt="Precision fade">
-      <div class="gallery-item-overlay"><span class="gallery-item-text">Precision Fade</span></div>
-    </div>
-    <div class="gallery-item">
-      <img src="images/hero.png" alt="Shop interior">
-      <div class="gallery-item-overlay"><span class="gallery-item-text">Our Space</span></div>
-    </div>
-    <div class="gallery-item">
-      <img src="images/barber-tools.png" alt="Premium tools">
-      <div class="gallery-item-overlay"><span class="gallery-item-text">Premium Tools</span></div>
-    </div>
-    <div class="gallery-item">
-      <img src="images/barber-tools.png" alt="Straight razor detail">
-      <div class="gallery-item-overlay"><span class="gallery-item-text">The Details</span></div>
-    </div>
-    <div class="gallery-item tall">
-      <img src="images/hero.png" alt="Classic barbershop">
-      <div class="gallery-item-overlay"><span class="gallery-item-text">Classic Vibes</span></div>
-    </div>
-    <div class="gallery-item">
-      <img src="images/barber-action.png" alt="Beard trim">
-      <div class="gallery-item-overlay"><span class="gallery-item-text">Beard Work</span></div>
+<!-- ═══════════════ BANKSY ART SECTION ═══════════════ -->
+<section class="banksy-section" id="gallery">
+  <div class="banksy-full">
+    <canvas id="banksy-scene"></canvas>
+    <div class="banksy-caption reveal">
+      <span class="banksy-caption-tag">The Craft</span>
+      <span class="banksy-caption-title">Every Cut is a Masterpiece</span>
     </div>
   </div>
 </section>
@@ -791,6 +787,9 @@ async function init() {
   initParticles();
   initCursor();
   initCounters();
+  initBanksyHero();
+  initBanksyScene();
+  initDrips();
   await loadFromServer();
 }
 
@@ -818,6 +817,407 @@ async function loadFromServer() {
       }
     }
   } catch (e) { console.warn("Could not load bookings from server:", e); }
+}
+
+// ═══════════════════════════════════════════
+// BANKSY HERO BACKGROUND ANIMATION
+// ═══════════════════════════════════════════
+function initBanksyHero() {
+  const canvas = document.getElementById('banksy-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  function resize() { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // Banksy image as background with paint-reveal effect
+  const img = new Image();
+  img.src = 'images/banksy-barber.png';
+
+  let revealProgress = 0;   // 0..1 - how much is revealed
+  let scanX = 0;            // spray can X position
+  let scanDir = 1;
+  let sprayParticles = [];
+  let time = 0;
+
+  // Spray particles for the paint effect
+  function addSpray(x, y, col) {
+    for (let i = 0; i < 6; i++) {
+      sprayParticles.push({
+        x: x + (Math.random() - 0.5) * 80,
+        y: y + (Math.random() - 0.5) * 80,
+        r: Math.random() * 3 + 1,
+        a: Math.random() * 0.5 + 0.1,
+        life: 1,
+        col
+      });
+    }
+  }
+
+  function drawFrame() {
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+
+    // Dark concrete wall background
+    ctx.fillStyle = '#0a0a0a';
+    ctx.fillRect(0, 0, W, H);
+
+    // Subtle brick/concrete texture lines
+    ctx.strokeStyle = 'rgba(255,255,255,0.015)';
+    ctx.lineWidth = 1;
+    for (let y = 0; y < H; y += 60) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    }
+    for (let x = 0; x < W; x += 120) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+    }
+
+    time += 0.008;
+
+    // Draw banksy image with gradient mask (paint reveal from left)
+    if (img.complete && img.naturalWidth > 0) {
+      // slowly reveal the image
+      if (revealProgress < 1) revealProgress += 0.0015;
+      const revealW = Math.floor(W * Math.min(revealProgress, 1));
+
+      // Save & clip to revealed region
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, 0, revealW, H);
+      ctx.clip();
+
+      // Draw the image - desaturated / high contrast Banksy style
+      ctx.globalAlpha = 0.75;
+      ctx.filter = 'grayscale(100%) contrast(1.6) brightness(0.55)';
+      const scale = Math.max(W / img.naturalWidth, H / img.naturalHeight);
+      const iw = img.naturalWidth * scale;
+      const ih = img.naturalHeight * scale;
+      const ix = (W - iw) / 2;
+      const iy = (H - ih) / 2;
+      ctx.drawImage(img, ix, iy, iw, ih);
+      ctx.filter = 'none';
+      ctx.globalAlpha = 1;
+      ctx.restore();
+
+      // Spray can at the reveal edge
+      if (revealProgress < 1) {
+        scanX = revealW;
+        addSpray(scanX, H * 0.5 + Math.sin(time * 3) * H * 0.25, 'rgba(200,164,78,');
+      }
+    }
+
+    // Gold spray-paint edge shimmer
+    if (revealProgress < 1) {
+      const edgeX = Math.floor(W * revealProgress);
+      const grad = ctx.createLinearGradient(edgeX - 60, 0, edgeX + 20, 0);
+      grad.addColorStop(0, 'rgba(200,164,78,0)');
+      grad.addColorStop(0.7, 'rgba(200,164,78,0.18)');
+      grad.addColorStop(1, 'rgba(200,164,78,0.5)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(edgeX - 60, 0, 80, H);
+    }
+
+    // Render spray particles
+    sprayParticles = sprayParticles.filter(p => p.life > 0.05);
+    sprayParticles.forEach(p => {
+      p.life -= 0.025;
+      p.y -= 0.5;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.col + (p.a * p.life).toFixed(2) + ')';
+      ctx.fill();
+    });
+
+    // Gold graffiti tag in corner
+    ctx.save();
+    ctx.font = 'italic bold 13px serif';
+    ctx.fillStyle = 'rgba(200,164,78,0.35)';
+    ctx.translate(W - 20, H - 30);
+    ctx.rotate(-Math.PI / 6);
+    ctx.fillText('Kings ✂', 0, 0);
+    ctx.restore();
+
+    requestAnimationFrame(drawFrame);
+  }
+
+  img.onload = drawFrame;
+  if (img.complete) drawFrame();
+  else img.onerror = () => { drawFrame(); }; // fallback: draw even without image
+}
+
+// ═══════════════════════════════════════════
+// BANKSY SCENE – standalone animated section
+// ═══════════════════════════════════════════
+function initBanksyScene() {
+  const canvas = document.getElementById('banksy-scene');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  function resize() { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+
+  let t = 0;
+  // Animation state
+  let armAngle = 0;      // barber arm angle
+  let hairLen = 0;       // how much hair has been cut
+  let snipT = 0;         // scissor snip timer
+  let scissors = false;  // scissor open/closed
+  let cuttingPhase = 0;  // 0=approach 1=cut 2=rest
+  let hairStrands = [];  // falling hair
+  let sprayDots = [];    // spray paint dots building up the scene
+  let buildProgress = 0; // 0..1 stencil paint reveal
+
+  function addHairStrand(x, y) {
+    hairStrands.push({
+      x, y,
+      vx: (Math.random() - 0.5) * 1.5,
+      vy: Math.random() * 0.5 + 0.3,
+      len: Math.random() * 12 + 5,
+      angle: Math.random() * Math.PI,
+      life: 1
+    });
+  }
+
+  function drawBanksyScene(W, H) {
+    // --- Background: dark concrete ---
+    ctx.fillStyle = '#060606';
+    ctx.fillRect(0, 0, W, H);
+
+    // Concrete texture
+    for (let i = 0; i < 4; i++) {
+      ctx.strokeStyle = `rgba(255,255,255,${0.008 + i * 0.003})`;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, H * (0.2 + i * 0.2));
+      ctx.lineTo(W, H * (0.2 + i * 0.18));
+      ctx.stroke();
+    }
+
+    // Spray build-up dots in background
+    if (buildProgress < 1) buildProgress += 0.003;
+    const dotCount = Math.floor(buildProgress * 200);
+    const rng = (seed) => { let x = Math.sin(seed) * 10000; return x - Math.floor(x); };
+    for (let i = 0; i < dotCount; i++) {
+      const dx = rng(i * 1.3 + 1) * W;
+      const dy = rng(i * 2.7 + 2) * H;
+      const dr = rng(i * 0.9 + 3) * 4 + 0.5;
+      ctx.beginPath();
+      ctx.arc(dx, dy, dr, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${rng(i * 3.1 + 4) * 0.04})`;
+      ctx.fill();
+    }
+
+    const cx = W * 0.5;
+    const cy = H * 0.5;
+    const scale = Math.min(W, H) * 0.0035;
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(scale, scale);
+
+    // ── CLIENT in barber chair ──
+    // Chair base
+    ctx.fillStyle = 'rgba(255,255,255,0.88)';
+    // Seat
+    ctx.beginPath();
+    ctx.rect(-55, 30, 110, 18);
+    ctx.fill();
+    // Chair back
+    ctx.beginPath();
+    ctx.rect(-50, -60, 12, 92);
+    ctx.fill();
+    // Footrest
+    ctx.beginPath();
+    ctx.rect(20, 55, 50, 10);
+    ctx.fill();
+    // Pole
+    ctx.beginPath();
+    ctx.rect(-10, 48, 20, 80);
+    ctx.fill();
+    // Base
+    ctx.beginPath();
+    ctx.ellipse(0, 130, 55, 12, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Client body (sitting)
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    // Torso
+    ctx.beginPath();
+    ctx.rect(-28, -10, 56, 42);
+    ctx.fill();
+    // Head
+    ctx.beginPath();
+    ctx.ellipse(0, -55, 28, 34, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Legs
+    ctx.fillRect(-24, 32, 20, 40);
+    ctx.fillRect(4, 32, 20, 40);
+
+    // Cape/gown
+    ctx.fillStyle = 'rgba(30,30,30,0.9)';
+    ctx.beginPath();
+    ctx.moveTo(-38, -5);
+    ctx.lineTo(38, -5);
+    ctx.lineTo(50, 50);
+    ctx.lineTo(-50, 50);
+    ctx.closePath();
+    ctx.fill();
+
+    // Hair on top of head (being cut)
+    const hairStyle = 'rgba(255,255,255,0.9)';
+    ctx.strokeStyle = hairStyle;
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    const hairLines = [
+      [-18, -82, -14, -68], [-8, -86, -6, -70], [2, -87, 4, -71],
+      [12, -85, 10, -69], [20, -80, 18, -66]
+    ];
+    hairLines.forEach(([x1, y1, x2, y2]) => {
+      ctx.beginPath();
+      ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+      ctx.stroke();
+    });
+
+    // ── BARBER (standing to the right) ──
+    const bx = 85; // barber X offset
+
+    // Barber legs
+    ctx.fillStyle = 'rgba(255,255,255,0.88)';
+    ctx.fillRect(bx - 15, 40, 13, 60);
+    ctx.fillRect(bx + 2, 40, 13, 60);
+    // Body
+    ctx.beginPath();
+    ctx.rect(bx - 20, -15, 40, 58);
+    ctx.fill();
+    // Head
+    ctx.beginPath();
+    ctx.ellipse(bx, -38, 18, 22, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Hat
+    ctx.fillRect(bx - 20, -62, 40, 8);
+    ctx.fillRect(bx - 14, -90, 28, 32);
+
+    // ── ANIMATED ARM with scissors ──
+    t += 0.018;
+    snipT += 0.07;
+    // arm swings side to side while cutting
+    const armSwing = Math.sin(t) * 18;
+    const armReach = -30 + Math.sin(t * 0.5) * 10;
+
+    ctx.save();
+    ctx.translate(bx - 18, -5);
+    ctx.rotate((armSwing - 35) * Math.PI / 180);
+    // Forearm
+    ctx.fillStyle = 'rgba(255,255,255,0.88)';
+    ctx.beginPath();
+    ctx.rect(-6, 0, 12, 55);
+    ctx.fill();
+    // Hand
+    ctx.beginPath();
+    ctx.ellipse(0, 58, 9, 7, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Scissors in hand
+    const snipOpen = (Math.sin(snipT) > 0 ? 1 : -1) * 0.35;
+    ctx.strokeStyle = 'rgba(200,164,78,0.95)';
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    // Blade 1
+    ctx.save();
+    ctx.translate(0, 64);
+    ctx.rotate(snipOpen);
+    ctx.beginPath();
+    ctx.moveTo(0, 0); ctx.lineTo(0, -30);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(6, 4, 6, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+    // Blade 2
+    ctx.save();
+    ctx.translate(0, 64);
+    ctx.rotate(-snipOpen);
+    ctx.beginPath();
+    ctx.moveTo(0, 0); ctx.lineTo(0, -30);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(-6, 4, 6, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+
+    ctx.restore(); // end arm
+
+    // ── GOLD SPRAY PAINT SPLATTER around the barber area ──
+    ctx.save();
+    const splats = [[bx - 80, -90, 6], [bx + 60, -80, 4], [-70, 100, 5], [bx + 30, 80, 3]];
+    splats.forEach(([sx, sy, sr]) => {
+      const grad = ctx.createRadialGradient(sx, sy, 0, sx, sy, sr * 8);
+      grad.addColorStop(0, 'rgba(200,164,78,0.25)');
+      grad.addColorStop(1, 'rgba(200,164,78,0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(sx, sy, sr * 8, 0, Math.PI * 2);
+      ctx.fill();
+      // Solid dot
+      ctx.beginPath();
+      ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(200,164,78,0.6)';
+      ctx.fill();
+    });
+    ctx.restore();
+
+    ctx.restore(); // end main translate+scale
+
+    // ── Falling hair strands from cut ──
+    if (Math.random() < 0.18) {
+      const ex = cx + Math.sin(t) * 55 * Math.min(W, H) * 0.0035;
+      const ey = cy - 60 * Math.min(W, H) * 0.0035;
+      addHairStrand(ex, ey);
+    }
+    hairStrands = hairStrands.filter(h => h.life > 0.05);
+    hairStrands.forEach(h => {
+      h.x += h.vx; h.y += h.vy; h.life -= 0.012;
+      ctx.save();
+      ctx.translate(h.x, h.y);
+      ctx.rotate(h.angle);
+      ctx.strokeStyle = `rgba(255,255,255,${h.life * 0.8})`;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(-h.len / 2, 0); ctx.lineTo(h.len / 2, 0);
+      ctx.stroke();
+      ctx.restore();
+    });
+
+    // ── Banksy-style stencil tag ──
+    ctx.save();
+    ctx.font = `italic bold ${Math.max(12, W * 0.018)}px serif`;
+    ctx.fillStyle = 'rgba(200,164,78,0.3)';
+    ctx.fillText('Not Just A Haircut.', W * 0.04, H * 0.94);
+    ctx.restore();
+  }
+
+  function loop() {
+    drawBanksyScene(canvas.width, canvas.height);
+    requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+// ═══════════════════════════════════════════
+// GOLD DRIP ACCENTS IN HERO
+// ═══════════════════════════════════════════
+function initDrips() {
+  const container = document.getElementById('hero-drips');
+  if (!container) return;
+  const positions = [8, 18, 32, 45, 58, 70, 82, 92];
+  positions.forEach(pct => {
+    const d = document.createElement('div');
+    d.className = 'drip';
+    d.style.left = pct + '%';
+    d.style.animationDuration = (4 + Math.random() * 6) + 's';
+    d.style.animationDelay = (Math.random() * 8) + 's';
+    d.style.width = (1 + Math.random() * 2) + 'px';
+    d.style.opacity = (0.3 + Math.random() * 0.5);
+    container.appendChild(d);
+  });
 }
 
 function applySettings() {
