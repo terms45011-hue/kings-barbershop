@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #050505; --bg-card: #0d0d0d; --bg-card2: #141414; --bg-input: #1a1a1a;
+      --bg: rgba(4,4,4,0.82); --bg-card: rgba(12,12,12,0.88); --bg-card2: rgba(18,18,18,0.9); --bg-input: rgba(24,24,24,0.92);
       --gold: #c8a44e; --gold-l: #e8c86e; --gold-d: #8a6e2c; --gold-glow: rgba(200,164,78,0.25);
       --white: #f5f5f5; --text: #e8e8e8; --text-m: #777; --text-d: #3a3a3a;
       --border: rgba(200,164,78,0.12); --border-h: rgba(200,164,78,0.4);
@@ -22,7 +22,7 @@
     }
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     html{scroll-behavior:smooth;font-size:16px}
-    body{background:var(--bg);color:var(--text);font-family:var(--font-b);line-height:1.6;overflow-x:hidden}
+    body{background:transparent;color:var(--text);font-family:var(--font-b);line-height:1.6;overflow-x:hidden}
     img{max-width:100%;height:auto;display:block} a{text-decoration:none;color:inherit} button{cursor:pointer;border:none;background:none;font-family:inherit}
     ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:var(--bg)} ::-webkit-scrollbar-thumb{background:var(--gold-d);border-radius:3px}
     ::selection{background:var(--gold);color:var(--bg)}
@@ -66,7 +66,7 @@
     .mob-book-btn:hover{background:var(--gold);color:var(--bg)}
 
     /* ─── HERO ─── */
-    .hero{min-height:100vh;display:flex;align-items:center;position:relative;overflow:hidden;background:#030303}
+    .hero{min-height:100vh;display:flex;align-items:center;position:relative;overflow:hidden;background:rgba(3,3,3,0.7)}
     /* Video background */
     .hero-video-wrap{position:absolute;inset:0;z-index:0;overflow:hidden}
     .hero-video{width:100%;height:100%;object-fit:cover;filter:grayscale(100%) contrast(1.4) brightness(0.45);transform:scale(1.05)}
@@ -1255,9 +1255,9 @@ function initCheckerBg() {
   let resizeTimer;
   window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(resize, 150); });
 
-  // Colour palette: near-black vs dark gold-tinted
+  // Colour palette: true black vs bright dark-gold (high contrast!)
   const C_DARK  = [3,   3,   3  ];
-  const C_LIGHT = [22,  17,  6  ];
+  const C_LIGHT = [110, 82,  22 ];
   const FREQ = 10; // checker squares count
 
   function drawFrame() {
