@@ -796,7 +796,7 @@ async function init() {
 
 async function loadFromServer() {
   try {
-    const res = await fetch('https://kvdb.io/6M2L6yjedppWbHMJ6HPNcJ/settings');
+    const res = await fetch('https://kvdb.io/6M2L6yjedppWbHMJ6HPNcJ/settings?t=' + Date.now());
     if (res.ok) {
       const serverSettings = await res.json();
       if (serverSettings && Object.keys(serverSettings).length > 0) {
@@ -807,7 +807,7 @@ async function loadFromServer() {
     }
   } catch (e) { console.warn("Could not load settings from server:", e); }
   try {
-    const res = await fetch('https://kvdb.io/6M2L6yjedppWbHMJ6HPNcJ/bookings');
+    const res = await fetch('https://kvdb.io/6M2L6yjedppWbHMJ6HPNcJ/bookings?t=' + Date.now());
     if (res.ok) {
       const serverBookings = await res.json();
       if (serverBookings) {
@@ -1492,6 +1492,14 @@ async function confirmBooking(){
   const phone=document.getElementById('inp-phone').value.trim();
   const notes=document.getElementById('inp-notes').value.trim();
   if(!name||!phone){showToast('Please enter your name and phone number.','error');return}
+  try {
+    const res = await fetch('https://kvdb.io/6M2L6yjedppWbHMJ6HPNcJ/bookings?t=' + Date.now());
+    if (res.ok) {
+      const serverBookings = await res.json();
+      if (serverBookings) B = serverBookings;
+    }
+  } catch (e) { console.warn("Could not sync latest bookings before save:", e); }
+
   if(!B[selDate])B[selDate]={};
   if(!B[selDate][selTime])B[selDate][selTime]=[];
   if(B[selDate][selTime].length>=S.maxPerSlot){

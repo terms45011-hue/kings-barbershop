@@ -263,7 +263,7 @@ function logout() {
 async function loadData() {
   document.getElementById('bookings-container').innerHTML = '<p class="empty-state">Loading data...</p>';
   try {
-    const resS = await fetch(DB_URL_SETTINGS);
+    const resS = await fetch(DB_URL_SETTINGS + '?t=' + Date.now());
     if(resS.ok) {
       const dbS = await resS.json();
       if(dbS && Object.keys(dbS).length) S = {...DEFAULTS, ...dbS};
@@ -271,7 +271,7 @@ async function loadData() {
   } catch(e) { console.error('Failed to load settings:', e); }
   
   try {
-    const resB = await fetch(DB_URL_BOOKINGS);
+    const resB = await fetch(DB_URL_BOOKINGS + '?t=' + Date.now());
     if(resB.ok) {
       const dbB = await resB.json();
       if(dbB) B = dbB;
