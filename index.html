@@ -121,7 +121,7 @@
     @keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
 
     /* ─── MARQUEE ─── */
-    .marquee{padding:1.5rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);overflow:hidden;position:relative;z-index:1;background:var(--bg)}
+    .marquee{padding:1.5rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);overflow:hidden;position:relative;z-index:1;background:transparent}
     .marquee-track{display:flex;gap:3rem;animation:marqueeScroll 30s linear infinite;width:max-content}
     .marquee-item{font-family:var(--font-h);font-size:1.1rem;color:var(--text-d);white-space:nowrap;display:flex;align-items:center;gap:3rem;letter-spacing:.08em}
     .marquee-dot{width:6px;height:6px;background:var(--gold);border-radius:50%;flex-shrink:0}
@@ -153,7 +153,7 @@
     .stagger.vis>*:nth-child(6){transition-delay:.6s;opacity:1;transform:none}
 
     /* ─── ABOUT ─── */
-    .about{background:var(--bg)}
+    .about{background:transparent}
     .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center}
     .about-img-wrap{position:relative;perspective:800px}
     .about-img{border-radius:var(--r-lg);overflow:hidden;position:relative;transform:rotateY(-5deg);transition:transform .6s ease;box-shadow:var(--shadow-card)}
@@ -169,7 +169,7 @@
     .about-stat-lbl{font-size:.7rem;color:var(--text-m);letter-spacing:.1em;text-transform:uppercase;margin-top:.35rem}
 
     /* ─── GALLERY ─── */
-    .gallery{background:var(--bg-card);overflow:hidden}
+    .gallery{background:transparent;overflow:hidden}
     .gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
     .gallery-item{position:relative;overflow:hidden;aspect-ratio:1;cursor:pointer}
     .gallery-item.tall{grid-row:span 2}
@@ -180,7 +180,7 @@
     .gallery-item-text{font-family:var(--font-h);font-size:1.1rem;color:var(--white)}
 
     /* ─── SERVICES ─── */
-    .services{background:var(--bg)}
+    .services{background:transparent}
     .services-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem}
     .svc-card{background:var(--bg-card);border:1px solid var(--border);padding:2.5rem;position:relative;overflow:hidden;transition:var(--tr);transform-style:preserve-3d;perspective:600px}
     .svc-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0;transition:var(--tr)}
@@ -197,7 +197,7 @@
     .svc-dur{font-size:.7rem;color:var(--text-m);background:var(--bg-input);padding:.3rem .9rem;border:1px solid var(--border);letter-spacing:.05em}
 
     /* ─── EXPERIENCE / HOW IT WORKS ─── */
-    .experience{background:linear-gradient(180deg,var(--bg-card) 0%,var(--bg) 100%)}
+    .experience{background:transparent}
     .exp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3rem}
     .exp-card{text-align:center;padding:3rem 2rem;border:1px solid var(--border);position:relative;transition:var(--tr)}
     .exp-card:hover{border-color:var(--gold);background:rgba(200,164,78,.02)}
@@ -207,14 +207,14 @@
     .exp-desc{color:var(--text-m);font-size:.875rem;line-height:1.7}
 
     /* ─── BOOKING CTA ─── */
-    .book-cta{text-align:center;position:relative;overflow:hidden;padding:8rem 0;background:var(--bg-card)}
+    .book-cta{text-align:center;position:relative;overflow:hidden;padding:8rem 0;background:transparent}
     .book-cta::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,rgba(200,164,78,.06) 0%,transparent 70%)}
     .book-cta .container{position:relative;z-index:1}
     .book-cta .section-title{font-size:clamp(2.5rem,5vw,4rem)}
     .book-cta .section-sub{margin:0 auto 3rem}
 
     /* ─── TESTIMONIALS ─── */
-    .testi{background:var(--bg)}
+    .testi{background:transparent}
     .testi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem}
     .testi-card{background:var(--bg-card);border:1px solid var(--border);padding:2.5rem;transition:var(--tr);position:relative}
     .testi-card:hover{border-color:var(--border-h);transform:translateY(-4px)}
@@ -227,7 +227,7 @@
     .author-loc{font-size:.7rem;color:var(--text-m);letter-spacing:.05em}
 
     /* ─── CONTACT ─── */
-    .contact{background:var(--bg-card)}
+    .contact{background:transparent}
     .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:start}
     .contact-info{display:flex;flex-direction:column;gap:1.75rem}
     .contact-item{display:flex;gap:1.25rem;align-items:flex-start}
@@ -244,7 +244,7 @@
     .hours-closed{color:var(--red)}
 
     /* ─── FOOTER ─── */
-    footer{background:var(--bg);border-top:1px solid var(--border);padding:4rem 0 2rem}
+    footer{background:rgba(4,4,4,0.92);border-top:1px solid var(--border);padding:4rem 0 2rem}
     .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:3rem;margin-bottom:3rem}
     .footer-brand{font-family:var(--font-h);font-size:1.3rem;color:var(--gold);letter-spacing:.12em;margin-bottom:.75rem}
     .footer-desc{color:var(--text-m);font-size:.85rem;line-height:1.7;max-width:300px}
