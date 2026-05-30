@@ -757,6 +757,18 @@
   <span class="toast-msg" id="toast-msg"></span>
 </div>
 
+<!-- Supabase JS Client -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+// ═══════════════════════════════════════════
+// SUPABASE INIT
+// ═══════════════════════════════════════════
+const SUPABASE_URL = 'https://cptwqlnjcmkvrffhxzvh.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_yQ5T0Uc8xdp8rHL3MnyH1A_IavXkzG8';
+const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+</script>
+
 <script>
 // ═══════════════════════════════════════════
 // SETTINGS & STATE
@@ -795,6 +807,7 @@ async function init() {
 }
 
 async function loadFromServer() {
+  // Load settings (still from kvdb)
   try {
     const res = await fetch('https://kvdb.io/6M2L6yjedppWbHMJ6HPNcJ/settings?t=' + Date.now());
     if (res.ok) {
@@ -806,18 +819,37 @@ async function loadFromServer() {
       }
     }
   } catch (e) { console.warn("Could not load settings from server:", e); }
+
+  // Load bookings from Supabase
   try {
-    const res = await fetch('https://kvdb.io/6M2L6yjedppWbHMJ6HPNcJ/bookings?t=' + Date.now());
-    if (res.ok) {
-      const serverBookings = await res.json();
-      if (serverBookings) {
-        B = serverBookings;
-        localStorage.setItem('bs_bookings', JSON.stringify(B));
-        renderCal();
-        if (curStep === 2) renderSlots();
-      }
-    }
-  } catch (e) { console.warn("Could not load bookings from server:", e); }
+    const { data, error } = await _supabase
+      .from('bookings')
+      .select('*')
+      .order('booking_date', { ascending: true })
+      .order('booking_time', { ascending: true });
+    if (error) throw error;
+    // Convert flat rows into the nested B[date][time][] structure
+    B = {};
+    (data || []).forEach(row => {
+      const d = row.booking_date; // 'YYYY-MM-DD'
+      const t = row.booking_time.slice(0,5); // 'HH:MM'
+      if (!B[d]) B[d] = {};
+      if (!B[d][t]) B[d][t] = [];
+      B[d][t].push({
+        id: row.id,
+        name: row.client_name,
+        phone: row.client_phone,
+        notes: '',
+        service: row.service_name,
+        date: d,
+        time: t,
+        bookedAt: row.created_at
+      });
+    });
+    localStorage.setItem('bs_bookings', JSON.stringify(B));
+    renderCal();
+    if (curStep === 2) renderSlots();
+  } catch (e) { console.warn("Could not load bookings from Supabase:", e); }
 }
 
 // ═══════════════════════════════════════════
@@ -1492,40 +1524,61 @@ async function confirmBooking(){
   const phone=document.getElementById('inp-phone').value.trim();
   const notes=document.getElementById('inp-notes').value.trim();
   if(!name||!phone){showToast('Please enter your name and phone number.','error');return}
-  try {
-    const res = await fetch('https://kvdb.io/6M2L6yjedppWbHMJ6HPNcJ/bookings?t=' + Date.now());
-    if (res.ok) {
-      const serverBookings = await res.json();
-      if (serverBookings) B = serverBookings;
-    }
-  } catch (e) { console.warn("Could not sync latest bookings before save:", e); }
 
-  if(!B[selDate])B[selDate]={};
-  if(!B[selDate][selTime])B[selDate][selTime]=[];
-  if(B[selDate][selTime].length>=S.maxPerSlot){
-    showToast('Sorry, this slot just filled up! Please choose another time.','error');
-    showStep(2);renderSlots();return;
-  }
-  const booking={id:Date.now(),name,phone,notes,date:selDate,time:selTime,bookedAt:new Date().toISOString()};
-  B[selDate][selTime].push(booking);
-  localStorage.setItem('bs_bookings',JSON.stringify(B));
+  // Check slot capacity from live Supabase data
   try {
-    await fetch('https://kvdb.io/6M2L6yjedppWbHMJ6HPNcJ/bookings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(B)
+    const { data: slotData, error: slotErr } = await _supabase
+      .from('bookings')
+      .select('id')
+      .eq('booking_date', selDate)
+      .eq('booking_time', selTime + ':00');
+    if (!slotErr && slotData && slotData.length >= S.maxPerSlot) {
+      showToast('Sorry, this slot just filled up! Please choose another time.', 'error');
+      showStep(2); renderSlots(); return;
+    }
+  } catch(e) { console.warn('Could not verify slot capacity:', e); }
+
+  // Determine selected service
+  const selServiceEl = document.querySelector('.service-card.selected');
+  const service = selServiceEl ? selServiceEl.querySelector('.srv-name')?.textContent.trim() : 'Haircut';
+
+  // Insert into Supabase
+  try {
+    const { data, error } = await _supabase.from('bookings').insert([
+      {
+        client_name: name,
+        client_phone: phone,
+        booking_date: selDate,
+        booking_time: selTime + ':00',
+        service_name: service
+      }
+    ]).select();
+    if (error) throw error;
+
+    // Update local state
+    if(!B[selDate])B[selDate]={};
+    if(!B[selDate][selTime])B[selDate][selTime]=[];
+    const inserted = data[0];
+    B[selDate][selTime].push({
+      id: inserted.id, name, phone, notes, service,
+      date: selDate, time: selTime, bookedAt: inserted.created_at
     });
-  } catch (e) { console.error("Failed to sync booking to server:", e); }
-  document.getElementById('modal-footer').style.display='none';
-  showStep(4);
-  document.getElementById('booking-receipt').innerHTML=`
-    <div class="receipt-row"><span class="receipt-icon">👤</span><span class="receipt-label">Name</span><span class="receipt-val">${name}</span></div>
-    <div class="receipt-row"><span class="receipt-icon">📞</span><span class="receipt-label">Phone</span><span class="receipt-val">${phone}</span></div>
-    <div class="receipt-row"><span class="receipt-icon">📅</span><span class="receipt-label">Date</span><span class="receipt-val">${fmtDateDisplay(selDate)}</span></div>
-    <div class="receipt-row"><span class="receipt-icon">⏰</span><span class="receipt-label">Time</span><span class="receipt-val">${selTime}</span></div>
-    ${notes?`<div class="receipt-row"><span class="receipt-icon">📝</span><span class="receipt-label">Notes</span><span class="receipt-val">${notes}</span></div>`:''}
-  `;
-  showToast('Booking confirmed! See you soon 🎉','success');
+    localStorage.setItem('bs_bookings',JSON.stringify(B));
+
+    document.getElementById('modal-footer').style.display='none';
+    showStep(4);
+    document.getElementById('booking-receipt').innerHTML=`
+      <div class="receipt-row"><span class="receipt-icon">👤</span><span class="receipt-label">Name</span><span class="receipt-val">${name}</span></div>
+      <div class="receipt-row"><span class="receipt-icon">📞</span><span class="receipt-label">Phone</span><span class="receipt-val">${phone}</span></div>
+      <div class="receipt-row"><span class="receipt-icon">📅</span><span class="receipt-label">Date</span><span class="receipt-val">${fmtDateDisplay(selDate)}</span></div>
+      <div class="receipt-row"><span class="receipt-icon">⏰</span><span class="receipt-label">Time</span><span class="receipt-val">${selTime}</span></div>
+      <div class="receipt-row"><span class="receipt-icon">✂️</span><span class="receipt-label">Service</span><span class="receipt-val">${service}</span></div>
+    `;
+    showToast('Booking confirmed! See you soon 🎉','success');
+  } catch(e) {
+    console.error('Failed to save booking to Supabase:', e);
+    showToast('Something went wrong. Please try again.', 'error');
+  }
 }
 
 // ═══════════════════════════════════════════
