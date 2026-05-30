@@ -355,9 +355,13 @@
       .footer-grid{grid-template-columns:1fr}
       .about-stats{grid-template-columns:repeat(3,1fr);gap:1rem}
     }
+
+    /* ─── CHECKER BACKGROUND CANVAS ─── */
+    #bg-canvas{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none;display:block;image-rendering:auto}
   </style>
 </head>
 <body>
+<canvas id="bg-canvas"></canvas>
 
 <!-- Custom Cursor -->
 <div class="cursor" id="cursor"></div>
@@ -798,6 +802,7 @@ async function init() {
   initBanksyHero();
   initBanksyScene();
   initDrips();
+  initCheckerBg();
   await loadFromServer();
 }
 
@@ -1227,6 +1232,82 @@ function initBanksyScene() {
     requestAnimationFrame(loop);
   }
   loop();
+}
+
+// ═══════════════════════════════════════════
+// ANIMATED DISTORTED CHECKER BACKGROUND
+// ═══════════════════════════════════════════
+function initCheckerBg() {
+  const canvas = document.getElementById('bg-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let t = 0;
+  let W, H, animRunning = true;
+
+  function resize() {
+    const isMobile = window.innerWidth < 768;
+    // Render at reduced resolution then CSS scales it up for performance
+    const scale = isMobile ? 0.35 : 0.28;
+    W = canvas.width  = Math.max(1, Math.round(window.innerWidth  * scale));
+    H = canvas.height = Math.max(1, Math.round(window.innerHeight * scale));
+  }
+  resize();
+  let resizeTimer;
+  window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(resize, 150); });
+
+  // Colour palette: near-black vs dark gold-tinted
+  const C_DARK  = [3,   3,   3  ];
+  const C_LIGHT = [22,  17,  6  ];
+  const FREQ = 10; // checker squares count
+
+  function drawFrame() {
+    if (!animRunning) return;
+    const imgData = ctx.createImageData(W, H);
+    const d = imgData.data;
+
+    for (let py = 0; py < H; py++) {
+      for (let px = 0; px < W; px++) {
+        // Normalised coords [-1, 1]
+        const nx = (px / W)  * 2 - 1;
+        const ny = (py / H)  * 2 - 1;
+
+        // ── Wave distortion layers (mimics warped 3-D cloth)
+        const w1x = Math.sin(ny * 3.4 + t * 0.55) * 0.28;
+        const w1y = Math.cos(nx * 2.9 - t * 0.45) * 0.22;
+        const w2x = Math.cos(ny * 1.8 - t * 0.28) * 0.18;
+        const w2y = Math.sin(nx * 2.1 + t * 0.32) * 0.20;
+        const w3x = Math.sin((nx + ny) * 2.5 + t * 0.4) * 0.12;
+        const w3y = Math.cos((nx - ny) * 2.0 - t * 0.35) * 0.12;
+
+        const sx = nx + w1x + w2x + w3x;
+        const sy = ny + w1y + w2y + w3y;
+
+        // ── Checker index
+        const ci = Math.floor((sx + 2) * FREQ);
+        const cj = Math.floor((sy + 2) * FREQ);
+        const isLight = (ci + cj) % 2 === 0;
+
+        const col = isLight ? C_LIGHT : C_DARK;
+        const idx = (py * W + px) * 4;
+        d[idx]     = col[0];
+        d[idx + 1] = col[1];
+        d[idx + 2] = col[2];
+        d[idx + 3] = 255;
+      }
+    }
+
+    ctx.putImageData(imgData, 0, 0);
+    t += 0.016;
+    requestAnimationFrame(drawFrame);
+  }
+
+  // Pause when tab hidden to save battery on mobile
+  document.addEventListener('visibilitychange', () => {
+    animRunning = !document.hidden;
+    if (animRunning) drawFrame();
+  });
+
+  drawFrame();
 }
 
 // ═══════════════════════════════════════════
