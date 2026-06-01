@@ -66,15 +66,13 @@
     .mob-book-btn:hover{background:var(--gold);color:var(--bg)}
 
     /* ─── HERO ─── */
-    .hero{min-height:100vh;display:flex;align-items:center;position:relative;overflow:hidden;background:rgba(3,3,3,0.7)}
+    .hero{width:100%;min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:rgba(3,3,3,0.7)}
     /* Image background */
-    .hero-video-wrap{position:absolute;inset:0;z-index:0;overflow:hidden}
-    .hero-video{width:100%;height:100%;object-fit:cover;filter:brightness(0.75) contrast(1.1) saturate(1.2);transform:scale(1.02)}
+    .hero-video-wrap{position:absolute;inset:0;z-index:1;overflow:hidden}
+    .hero-video{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;object-position:center;filter:brightness(0.75) contrast(1.1) saturate(1.2)}
     /* Cinematic overlays */
-    .hero-bg-overlay{position:absolute;inset:0;z-index:1;
-      background:
-        linear-gradient(180deg, rgba(3,3,3,0.65) 0%, rgba(3,3,3,0.1) 40%, rgba(3,3,3,0.8) 100%),
-        radial-gradient(ellipse at 50% 50%, rgba(200,164,78,0.04) 0%, transparent 70%);
+    .hero-bg-overlay{position:absolute;inset:0;z-index:2;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0.8));
     }
     /* Grain texture */
     .hero-noise{position:absolute;inset:0;z-index:2;opacity:.07;pointer-events:none;
@@ -86,7 +84,7 @@
     /* Vignette corners */
     .hero-vignette{position:absolute;inset:0;z-index:2;pointer-events:none;
       box-shadow:inset 0 0 180px rgba(0,0,0,0.7);}
-    .hero .container{position:relative;z-index:3;text-align:center;padding-top:140px;padding-bottom:100px}
+    .hero .container{position:relative;z-index:10;text-align:center;padding-top:140px;padding-bottom:100px}
 
     /* ─── BANKSY SECTION ─── */
     .banksy-section{position:relative;overflow:hidden;background:#050505;padding:0}
@@ -336,8 +334,10 @@
     }
     @media(max-width:768px){
       section{padding:5rem 0}
-      .hero-title{font-size:3.5rem}
-      .hero-video{object-fit:cover; object-position:20% center; transform:scale(1.05)}
+      .hero-title{font-size:clamp(2rem, 8vw, 3.5rem)}
+      .hero-video{object-fit:cover; object-position:center; transform:none}
+      .hero-actions{flex-direction:column;align-items:center;width:100%;gap:1rem}
+      .btn-gold,.btn-outline{width:100%;justify-content:center}
       .nav-links{display:none} .hamburger{display:flex}
       .footer-grid{grid-template-columns:1fr 1fr;gap:2rem}
       .footer-bottom{flex-direction:column;gap:.75rem;text-align:center}
